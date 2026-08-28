@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
+import { DirectionProvider } from "@/components/ui/direction";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const fontSans = Noto_Sans_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-noto-sans",
 });
 
 const geistMono = Geist_Mono({
@@ -20,10 +21,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="fa"
+      dir="rtl"
+      className={`${fontSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <DirectionProvider direction="rtl">{children}</DirectionProvider>
+      </body>
     </html>
   );
 }
