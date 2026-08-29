@@ -30,7 +30,7 @@ function NavLink({ item }: { item: NavItem }) {
           {item.label}
           <ChevronDown className="size-3.5 opacity-60" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="min-w-40">
+        <DropdownMenuContent align="start" className="min-w-44">
           {item.children.map((child) =>
             child.href ? (
               <DropdownMenuItem

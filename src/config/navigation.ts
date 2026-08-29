@@ -19,8 +19,8 @@ export const mainNavItems: NavItem[] = [
     label: "ران می‌شه",
     icon: Info,
     children: [
-      { label: "درباره ما", href: "/about" },
-      { label: "تماس با ما", href: "/contact" },
+      { label: "بررسی", href: "/review" },
+      { label: "محاسبه FPS", href: "/fps" },
     ],
   },
   {
