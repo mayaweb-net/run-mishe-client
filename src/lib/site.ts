@@ -4,4 +4,5 @@ export const siteConfig = {
   description: "پلتفرم ران می‌شه",
   logo: "/img/logo.svg",
   themeColor: "#242424",
+  accentColor: "var(--color-secondary-7)",
 } as const;

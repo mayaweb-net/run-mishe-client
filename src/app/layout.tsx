@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import { SiteHeader } from "@/components/layout/site-header";
 import { DirectionProvider } from "@/components/ui/direction";
 import { siteConfig } from "@/lib/site";
 import "@/styles/fonts-iran-yekan.css";
@@ -49,8 +50,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       dir="rtl"
       className={`${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <DirectionProvider direction="rtl">{children}</DirectionProvider>
+      <body className="flex min-h-full flex-col bg-background">
+        <DirectionProvider direction="rtl">
+          <SiteHeader />
+          <main className="flex flex-1 flex-col">{children}</main>
+        </DirectionProvider>
       </body>
     </html>
   );
