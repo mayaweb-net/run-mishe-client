@@ -38,6 +38,7 @@ export function FpsResultPanel({
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">{result.resolutionLabel}</Badge>
             <Badge variant="outline">{result.quality}</Badge>
+            <Badge variant="secondary">{result.confidenceLabel}</Badge>
           </div>
         </div>
       </div>
@@ -46,13 +47,26 @@ export function FpsResultPanel({
         <p className="text-6xl font-bold tracking-tight text-foreground sm:text-7xl">
           {result.estimatedFps}
         </p>
-        <p className="mt-2 text-base font-medium">FPS تخمینی</p>
+        <p className="mt-2 text-base font-medium">
+          FPS {result.confidenceLabel}
+        </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          محدوده: {result.fpsRange.min}-{result.fpsRange.max} FPS
+          ۱٪ Low: {result.onePercentLow} · محدوده: {result.fpsRange.min}-
+          {result.fpsRange.max}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {result.bottleneckLabel} ({result.limitedBy})
         </p>
         <div className="mx-auto mt-5 w-fit rounded-full border border-success/25 bg-success-bg px-5 py-2 text-sm font-semibold text-success">
           {result.statusLabel}
         </div>
+        {result.warnings.length > 0 ? (
+          <ul className="mx-auto mt-4 max-w-md space-y-1 text-start text-xs text-amber-700">
+            {result.warnings.map((warning) => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       <div className="rounded-xl border border-border/70 bg-card p-4">
@@ -62,7 +76,7 @@ export function FpsResultPanel({
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {result.resolutions.map((item) => {
-            const isActive = activeResolution === item.id;
+            const isActive = item.id === activeResolution;
 
             return (
               <button
