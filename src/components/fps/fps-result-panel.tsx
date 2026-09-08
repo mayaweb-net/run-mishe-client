@@ -39,6 +39,7 @@ export function FpsResultPanel({
             <Badge variant="outline">{result.resolutionLabel}</Badge>
             <Badge variant="outline">{result.quality}</Badge>
             <Badge variant="secondary">{result.confidenceLabel}</Badge>
+            <Badge variant="outline">{result.methodLabel}</Badge>
           </div>
         </div>
       </div>

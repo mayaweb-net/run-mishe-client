@@ -67,6 +67,7 @@ export type FpsResult = {
   fpsRange: { min: number; max: number };
   statusLabel: string;
   confidenceLabel: string;
+  methodLabel: string;
   limitedBy: "CPU" | "GPU";
   bottleneckLabel: string;
   warnings: string[];
@@ -83,6 +84,12 @@ type ApiResolution =
 
 type FpsEstimateApiResponse = {
   confidenceLabel: string;
+  method?: "calibrated" | "relative-recommended" | "demand-tier";
+  anchors?: {
+    recGpuIndex: number | null;
+    recCpuIndex: number | null;
+    recCpuInferred: boolean;
+  };
   preset: QualityPreset;
   warnings: string[];
   game: { id: string; name: string; coverUrl: string | null };
@@ -150,6 +157,21 @@ function toUiResolutions(
   });
 }
 
+function methodLabelFa(
+  method: FpsEstimateApiResponse["method"],
+): string {
+  switch (method) {
+    case "calibrated":
+      return "کالیبره‌شده";
+    case "relative-recommended":
+      return "نسبی به Recommended";
+    case "demand-tier":
+      return "سطل demandTier";
+    default:
+      return "تخمین";
+  }
+}
+
 export function mapEstimateToResult(
   api: FpsEstimateApiResponse,
   activeResolution: ResolutionId,
@@ -172,6 +194,7 @@ export function mapEstimateToResult(
     },
     statusLabel: statusForFps(active.fps),
     confidenceLabel: api.confidenceLabel,
+    methodLabel: methodLabelFa(api.method),
     limitedBy: active.limitedBy,
     bottleneckLabel: active.bottleneckLabel,
     warnings: api.warnings,
