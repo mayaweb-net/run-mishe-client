@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CircuitBoard,
   Cpu,
@@ -8,6 +8,7 @@ import {
   MemoryStick,
 } from "lucide-react";
 import { Logo } from "@/components/main/logo";
+import { EntitySearch } from "@/components/fps/entity-search";
 import {
   RunCheckEmptyState,
   RunCheckResultPanel,
@@ -19,7 +20,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -29,31 +29,97 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
-  defaultRunCheckInput,
-  getRunCheckResult,
+  defaultRunCheckSelection,
+  fetchRunCheck,
   howItWorksParagraphs,
   ramOptions,
-  type RunCheckInput,
+  type RunCheckResult,
+  type RunCheckSelection,
 } from "@/config/run-check";
+import { ApiError } from "@/lib/api-client";
+import {
+  searchCpus,
+  searchGames,
+  searchGpus,
+  type SearchOption,
+} from "@/lib/catalog-search";
+
+async function resolveDefaultOption(
+  search: (query: string) => Promise<SearchOption[]>,
+  name: string,
+): Promise<SearchOption | null> {
+  const options = await search(name);
+  const exact = options.find(
+    (item) => item.name.toLowerCase() === name.toLowerCase(),
+  );
+  return exact ?? options[0] ?? { id: "", name };
+}
 
 export function RunCheckPage() {
-  const [input, setInput] = useState<RunCheckInput>(defaultRunCheckInput);
-  const [gameQuery, setGameQuery] = useState(defaultRunCheckInput.game);
-  const [gpuQuery, setGpuQuery] = useState(defaultRunCheckInput.gpu);
-  const [cpuQuery, setCpuQuery] = useState(defaultRunCheckInput.cpu);
-  const [ram, setRam] = useState(defaultRunCheckInput.ram);
-  const [showResults, setShowResults] = useState(false);
+  const [selection, setSelection] = useState<RunCheckSelection>({
+    game: null,
+    gpu: null,
+    cpu: null,
+    ram: defaultRunCheckSelection.ram,
+  });
+  const [ready, setReady] = useState(false);
+  const [result, setResult] = useState<RunCheckResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
-  const result = useMemo(() => getRunCheckResult(input), [input]);
+  useEffect(() => {
+    let cancelled = false;
 
-  function handleCheck() {
-    setInput({
-      game: gameQuery.trim() || defaultRunCheckInput.game,
-      gpu: gpuQuery.trim() || defaultRunCheckInput.gpu,
-      cpu: cpuQuery.trim() || defaultRunCheckInput.cpu,
-      ram: ram || defaultRunCheckInput.ram,
-    });
-    setShowResults(true);
+    async function hydrateDefaults() {
+      try {
+        const [game, gpu, cpu] = await Promise.all([
+          resolveDefaultOption(searchGames, defaultRunCheckSelection.game!.name),
+          resolveDefaultOption(searchGpus, defaultRunCheckSelection.gpu!.name),
+          resolveDefaultOption(searchCpus, defaultRunCheckSelection.cpu!.name),
+        ]);
+        if (cancelled) return;
+        setSelection((prev) => ({ ...prev, game, gpu, cpu }));
+      } catch {
+        if (!cancelled) {
+          setSelection({
+            game: defaultRunCheckSelection.game,
+            gpu: defaultRunCheckSelection.gpu,
+            cpu: defaultRunCheckSelection.cpu,
+            ram: defaultRunCheckSelection.ram,
+          });
+        }
+      } finally {
+        if (!cancelled) setReady(true);
+      }
+    }
+
+    void hydrateDefaults();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleCheck() {
+    if (!selection.game?.id || !selection.gpu?.id || !selection.cpu?.id) {
+      setError("بازی، GPU و CPU را از نتایج جستجو انتخاب کن.");
+      return;
+    }
+
+    setPending(true);
+    setError(null);
+    try {
+      const next = await fetchRunCheck(selection);
+      setResult(next);
+    } catch (err) {
+      setResult(null);
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "بررسی با خطا مواجه شد. اتصال سرور را چک کن.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -72,19 +138,17 @@ export function RunCheckPage() {
         <Card className="h-fit ring-border/60 shadow-sm">
           <CardContent className="space-y-5 pt-1">
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="game">بازی</FieldLabel>
-                <div className="relative">
-                  <Gamepad2 className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="game"
-                    value={gameQuery}
-                    onChange={(event) => setGameQuery(event.target.value)}
-                    placeholder="جستجوی بازی..."
-                    className="ps-9"
-                  />
-                </div>
-              </Field>
+              <EntitySearch
+                id="game"
+                label="بازی"
+                placeholder="جستجوی بازی..."
+                icon={<Gamepad2 className="size-4" />}
+                value={selection.game}
+                onChange={(game) =>
+                  setSelection((prev) => ({ ...prev, game }))
+                }
+                search={searchGames}
+              />
 
               <div className="flex items-center gap-3 py-1">
                 <Separator className="flex-1" />
@@ -94,33 +158,25 @@ export function RunCheckPage() {
                 <Separator className="flex-1" />
               </div>
 
-              <Field>
-                <FieldLabel htmlFor="gpu">کارت گرافیک (GPU)</FieldLabel>
-                <div className="relative">
-                  <CircuitBoard className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="gpu"
-                    value={gpuQuery}
-                    onChange={(event) => setGpuQuery(event.target.value)}
-                    placeholder="جستجوی کارت گرافیک..."
-                    className="ps-9"
-                  />
-                </div>
-              </Field>
+              <EntitySearch
+                id="gpu"
+                label="کارت گرافیک (GPU)"
+                placeholder="جستجوی کارت گرافیک..."
+                icon={<CircuitBoard className="size-4" />}
+                value={selection.gpu}
+                onChange={(gpu) => setSelection((prev) => ({ ...prev, gpu }))}
+                search={searchGpus}
+              />
 
-              <Field>
-                <FieldLabel htmlFor="cpu">پردازنده (CPU)</FieldLabel>
-                <div className="relative">
-                  <Cpu className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="cpu"
-                    value={cpuQuery}
-                    onChange={(event) => setCpuQuery(event.target.value)}
-                    placeholder="جستجوی پردازنده..."
-                    className="ps-9"
-                  />
-                </div>
-              </Field>
+              <EntitySearch
+                id="cpu"
+                label="پردازنده (CPU)"
+                placeholder="جستجوی پردازنده..."
+                icon={<Cpu className="size-4" />}
+                value={selection.cpu}
+                onChange={(cpu) => setSelection((prev) => ({ ...prev, cpu }))}
+                search={searchCpus}
+              />
 
               <Field>
                 <FieldLabel htmlFor="ram">رم (RAM)</FieldLabel>
@@ -128,8 +184,11 @@ export function RunCheckPage() {
                   <div className="relative min-w-0 flex-1">
                     <MemoryStick className="pointer-events-none absolute start-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Select
-                      value={ram}
-                      onValueChange={(value) => value && setRam(value)}
+                      value={selection.ram}
+                      onValueChange={(value) =>
+                        value &&
+                        setSelection((prev) => ({ ...prev, ram: value }))
+                      }
                     >
                       <SelectTrigger id="ram" className="w-full ps-9">
                         <SelectValue placeholder="انتخاب رم..." />
@@ -150,19 +209,24 @@ export function RunCheckPage() {
               </Field>
             </FieldGroup>
 
+            {error ? (
+              <p className="text-sm text-destructive">{error}</p>
+            ) : null}
+
             <Button
               type="button"
               className="h-11 w-full rounded-xl text-base"
-              onClick={handleCheck}
+              disabled={!ready || pending}
+              onClick={() => void handleCheck()}
             >
-              ران میشه؟
+              {pending ? "در حال بررسی..." : "ران میشه؟"}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="min-h-[420px] ring-border/60 shadow-sm">
           <CardContent className="pt-1">
-            {showResults ? (
+            {result ? (
               <RunCheckResultPanel result={result} />
             ) : (
               <RunCheckEmptyState />

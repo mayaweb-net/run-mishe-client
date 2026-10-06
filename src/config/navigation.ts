@@ -21,6 +21,7 @@ export const mainNavItems: NavItem[] = [
     children: [
       { label: "بررسی", href: "/review" },
       { label: "محاسبه FPS", href: "/fps" },
+      { label: "گلوگاه", href: "/bottleneck" },
     ],
   },
   {
