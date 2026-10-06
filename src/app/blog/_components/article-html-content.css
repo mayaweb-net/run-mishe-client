@@ -1,0 +1,287 @@
+/**
+ * رندر HTML مقالات از TipTap (ادمین)
+ * رنگ/هایلایت از inline style حفظ می‌شود؛ اینجا فقط تایپوگرافی و فاصلهٔ پایه.
+ */
+
+.article-html-content {
+  /*
+   * متغیرهای TipTap / tiptap-ui (هم‌نام با herozee-admin/src/styles/_variables.scss)
+   * تا مقادیر ذخیره‌شده مثل background-color: var(--tt-color-highlight-purple) resolve شوند.
+   */
+  --white: rgba(255, 255, 255, 1);
+  --black: rgba(14, 14, 17, 1);
+  --transparent: rgba(255, 255, 255, 0);
+  --tt-bg-color: var(--white);
+
+  --tt-color-text-gray: hsl(45, 2%, 46%);
+  --tt-color-text-brown: hsl(19, 31%, 47%);
+  --tt-color-text-orange: hsl(30, 89%, 45%);
+  --tt-color-text-yellow: hsl(38, 62%, 49%);
+  --tt-color-text-green: hsl(148, 32%, 39%);
+  --tt-color-text-blue: hsl(202, 54%, 43%);
+  --tt-color-text-purple: hsl(274, 32%, 54%);
+  --tt-color-text-pink: hsl(328, 49%, 53%);
+  --tt-color-text-red: hsl(2, 62%, 55%);
+
+  --tt-color-highlight-yellow: #fef9c3;
+  --tt-color-highlight-green: #dcfce7;
+  --tt-color-highlight-blue: #e0f2fe;
+  --tt-color-highlight-purple: #f3e8ff;
+  --tt-color-highlight-red: #ffe4e6;
+  --tt-color-highlight-gray: rgb(248, 248, 247);
+  --tt-color-highlight-brown: rgb(244, 238, 238);
+  --tt-color-highlight-orange: rgb(251, 236, 221);
+  --tt-color-highlight-pink: rgb(252, 241, 246);
+
+  --tt-color-highlight-yellow-contrast: #fbe604;
+  --tt-color-highlight-green-contrast: #c7fad8;
+  --tt-color-highlight-blue-contrast: #ceeafd;
+  --tt-color-highlight-purple-contrast: #e4ccff;
+  --tt-color-highlight-red-contrast: #ffccd0;
+  --tt-color-highlight-gray-contrast: rgba(84, 72, 49, 0.15);
+  --tt-color-highlight-brown-contrast: rgba(210, 162, 141, 0.35);
+  --tt-color-highlight-orange-contrast: rgba(224, 124, 57, 0.27);
+  --tt-color-highlight-pink-contrast: rgba(225, 136, 179, 0.27);
+
+  --article-body-text: rgb(55 65 81);
+  --article-body-heading: rgb(17 24 39);
+  --article-body-muted: rgb(107 114 128);
+  --article-body-link: var(--primary, #2563eb);
+  --article-body-code-bg: rgb(243 244 246);
+  --article-body-quote-border: rgb(251 191 36);
+
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  color: var(--article-body-text);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  direction: rtl;
+  text-align: start;
+}
+
+/* پاراگراف‌ها: رنگ پیش‌فرض؛ spanهای رنگی داخلشان از inline می‌آیند */
+.article-html-content p {
+  margin-top: 0.65em;
+  margin-bottom: 0.65em;
+}
+
+.article-html-content p:first-child {
+  margin-top: 0;
+}
+
+.article-html-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* رنگ پیش‌فرض؛ اگر تیتر style="color:..." از ادیتور داشت، اینلاین برنده است */
+.article-html-content h1,
+.article-html-content h2,
+.article-html-content h3,
+.article-html-content h4,
+.article-html-content h5,
+.article-html-content h6 {
+  color: var(--article-body-heading);
+  font-weight: 800;
+  line-height: 1.35;
+  margin-top: 1.15em;
+  margin-bottom: 0.5em;
+}
+
+.article-html-content h1 {
+  font-size: 1.75rem;
+}
+.article-html-content h2 {
+  font-size: 1.5rem;
+}
+.article-html-content h3 {
+  font-size: 1.25rem;
+}
+.article-html-content h4 {
+  font-size: 1.1rem;
+}
+.article-html-content h5 {
+  font-size: 1rem;
+}
+.article-html-content h6 {
+  font-size: 0.95rem;
+  color: var(--article-body-muted);
+}
+
+.article-html-content a {
+  color: var(--article-body-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.article-html-content a:hover {
+  opacity: 0.9;
+}
+
+/* رنگ از span والد / TipTap ارث برده شود؛ رنگ ثابت نگذار */
+.article-html-content strong,
+.article-html-content b {
+  font-weight: 800;
+  color: inherit;
+}
+
+.article-html-content em,
+.article-html-content i {
+  font-style: italic;
+}
+
+.article-html-content u {
+  text-underline-offset: 2px;
+}
+
+.article-html-content s,
+.article-html-content strike {
+  text-decoration: line-through;
+  opacity: 0.9;
+}
+
+/* هایلایت TipTap: padding ملایم؛ رنگ از style / data-color */
+.article-html-content mark {
+  padding: 0.1em 0.25em;
+  border-radius: 0.2em;
+}
+
+.article-html-content ul,
+.article-html-content ol {
+  margin: 0.65em 0;
+  padding-inline-start: 1.35rem;
+  padding-inline-end: 0;
+  direction: rtl;
+  text-align: start;
+}
+
+.article-html-content ul {
+  list-style-type: disc;
+}
+
+.article-html-content ol {
+  list-style-type: decimal;
+}
+
+.article-html-content li {
+  margin: 0.3em 0;
+}
+
+.article-html-content ul[data-type='taskList'] {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.article-html-content ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  direction: rtl;
+}
+
+.article-html-content ul[data-type='taskList'] li > label {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin-top: 0.2rem;
+}
+
+.article-html-content ul[data-type='taskList'] li > div {
+  flex: 1;
+  text-align: right;
+}
+
+.article-html-content ul[data-type='taskList'] li > div > p {
+  margin: 0;
+}
+
+.article-html-content ul[data-type='taskList'] input[type='checkbox'] {
+  margin: 0;
+}
+
+.article-html-content blockquote {
+  margin: 1rem 0;
+  padding: 0.65rem 1rem;
+  border-inline-start: 4px solid var(--article-body-quote-border);
+  background: rgb(255 251 235 / 0.6);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: inherit;
+}
+
+.article-html-content pre {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background: var(--article-body-code-bg);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  direction: ltr;
+  text-align: left;
+}
+
+.article-html-content code {
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: var(--article-body-code-bg);
+}
+
+.article-html-content pre code {
+  padding: 0;
+  background: transparent;
+  font-size: inherit;
+}
+
+.article-html-content hr {
+  margin: 1.25rem 0;
+  border: 0;
+  border-top: 1px solid rgb(229 231 235);
+}
+
+.article-html-content img,
+.article-html-content video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.article-html-content img {
+  display: block;
+  margin-inline: auto;
+}
+
+.article-html-content figure {
+  margin: 1rem 0;
+}
+
+.article-html-content figcaption {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--article-body-muted);
+  text-align: center;
+}
+
+.article-html-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.article-html-content th,
+.article-html-content td {
+  border: 1px solid rgb(229 231 235);
+  padding: 0.5rem 0.65rem;
+  vertical-align: top;
+}
+
+.article-html-content th {
+  background: rgb(249 250 251);
+  font-weight: 700;
+  color: var(--article-body-heading);
+}
+
+.article-html-content iframe {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
