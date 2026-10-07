@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   Empty,
@@ -95,7 +96,12 @@ export function CpuMatrixTable({
             <TableRow key={row.cpu.id}>
               <TableCell className="sticky start-0 z-10 border-e bg-card">
                 <div className="space-y-1.5">
-                  <p className="font-medium leading-snug">{row.cpu.name}</p>
+                  <Link
+                    href={`/parts/cpu/${row.cpu.slug}`}
+                    className="font-medium leading-snug hover:text-primary hover:underline"
+                  >
+                    {row.cpu.name}
+                  </Link>
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="secondary">
                       {vendorLabel(row.cpu.vendor)}
